@@ -1,134 +1,151 @@
-Asynchronous FIFO Design
+# Asynchronous FIFO Design
 
-This repo contains verilog code for an asynchronous FIFO.
+This repository contains Verilog code for an asynchronous FIFO (First-In, First-Out) buffer where read and write operations are controlled by independent clock domains.
 
-Introduction
+---
 
-FIFO stands for "First-In, First-Out." It is a type of data structure or buffer in which the first data element added (the "first in") is the first one to be removed (the "first out"). This structure is commonly used in scenarios where order of operations is important.
+## Table of Contents
 
-Async FIFO, or Asynchronous FIFO, is a FIFO buffer where the read and write operations are controlled by independent clock domains. This means that the writing process and the reading process are driven by different clocks, which are not synchronized. Async FIFOs are used to safely transfer data between these asynchronous clock domains.
+- [Introduction](#introduction)
+- [Block Diagram](#block-diagram)
+- [Design Space Exploration and Strategies](#design-space-exploration-and-strategies)
+- [Full, Empty and Wrapping Conditions](#full-empty-and-wrapping-conditions)
+  - [Empty Condition](#empty-condition)
+  - [Full Condition](#full-condition)
+  - [Wrapping Around Condition](#wrapping-around-condition)
+- [Gray Code Counter](#gray-code-counter)
+- [Signal Definitions](#signal-definitions)
+- [Design Modules](#design-modules)
+- [Testbench Implementation](#testbench-implementation)
+- [Waveforms](#waveforms)
 
-<img width="638" height="222" alt="image" src="https://github.com/user-attachments/assets/ea434eff-1b29-4554-bc36-2276b18e9e56" />
+---
 
+## Introduction
 
-Design Space Exploration and Design Strategies
+FIFO (First-In, First-Out) is a buffer where the first data element written is the first one read. An asynchronous FIFO has separate write and read clock domains, so writing and reading are driven by independent clocks that are not synchronized.
 
-The block diagram of async FIFO that is implemented in this repo is given below.
-Thin lines represent single-bit signals whereas thick lines represent multi-bit signals.
+The implementation in this repository provides a well-structured asynchronous FIFO with pointer synchronization, dual-port memory, and status flags (full/empty).
 
-<img width="1125" height="577" alt="image" src="https://github.com/user-attachments/assets/74d71bfa-54b8-4d00-99dd-3721617b8e8e" />
+---
 
+## Block Diagram
 
-Full, Empty and Wrapping Condition
-Empty Condition
+Thin lines represent single-bit signals while thick lines represent multi-bit signals.
 
-The FIFO is empty when the read and write pointers are both equal. This condition happens when both pointers are reset to zero during a reset operation, or when the read pointer catches up to the write pointer, having read the last word from the FIFO.
+![Block diagram 1](https://github.com/user-attachments/assets/ea434eff-1b29-4554-bc36-2276b18e9e56)
 
-Full Condition
+![Block diagram 2](https://github.com/user-attachments/assets/74d71bfa-54b8-4d00-99dd-3721617b8e8e)
 
-The FIFO is full when the write pointer has wrapped around and caught up to the read pointer. This means that the write pointer has incremented past the final FIFO address and has wrapped around to the beginning of the FIFO memory buffer.
+---
 
-Wrapping Around Condition
+## Design Space Exploration and Strategies
 
-To distinguish between the full and empty conditions when the pointers are equal, an extra bit is added to each pointer. This extra bit helps in identifying whether the pointers have wrapped around:
+The design separates concerns into distinct modules for clarity and for easier verification. Key strategies include:
 
-When the write pointer increments past the final FIFO address, it will increment the unused MSB while setting the rest of the bits back to zero.
+- Using dual-port RAM for independent read/write access.
+- Using Gray-coded pointers to reduce synchronization hazards.
+- Synchronizing pointers across clock domains with two-flop synchronizers.
+- Using an extra MSB on pointers to distinguish full vs empty when binary pointer values are equal.
 
-The same is done with the read pointer.
+---
 
-If the MSBs of the two pointers are different, it means that the write pointer has wrapped one more time than the read pointer.
+## Full, Empty and Wrapping Conditions
 
-If the MSBs of the two pointers are the same, it means that both pointers have wrapped the same number of times.
+### Empty Condition
+The FIFO is empty when the read and write pointers are equal. This happens on reset (both pointers at zero) or when the read pointer catches up to the write pointer after reads.
 
-Gray Code Counter
+### Full Condition
+The FIFO is full when the write pointer wraps around and catches up with the read pointer such that the used depth equals capacity — the write pointer has wrapped one extra time relative to the read pointer.
 
-Gray code counters are used in FIFO design because they only allow one bit to change for each clock transition. This characteristic eliminates the problem associated with trying to synchronize multiple changing signals on the same clock edge, which is crucial for reliable operation in asynchronous systems.
+### Wrapping Around Condition
+To distinguish full vs empty when binary pointers are equal, an extra MSB (unused MSB) is added to each pointer to track wrap counts:
 
-Signals Definition
+- When the write pointer increments past the last FIFO address, its MSB toggles while the lower bits reset.
+- The read pointer behaves similarly on wrap.
+- If the MSBs differ, the write pointer has wrapped one more time than the read pointer (indicating potentially full).
+- If the MSBs are the same, both pointers have wrapped the same number of times (indicating empty when binary addresses match).
 
-Following is the list of signals used in the design with their definition:
+---
 
-wclk : Write clock signal
+## Gray Code Counter
 
-rclk : Read clock signal
+Gray-code counters are used for pointer representation because only one bit changes per increment. This minimizes metastability issues when synchronizing multi-bit pointers across clock domains.
 
-wdata : Write data bits
+---
 
-rdata : Read data bits
+## Signal Definitions
 
-wclk_en : Write clock enable, this signal controls the write operation to the FIFO memory. Data must not be written if the FIFO memory is full (wfull = 1)
+- wclk : Write clock signal
+- rclk : Read clock signal
+- wdata : Write data bus
+- rdata : Read data bus
+- wclk_en : Write clock enable — controls writes to memory (no writes when FIFO is full, i.e., wfull = 1)
+- wptr : Write pointer (Gray code)
+- rptr : Read pointer (Gray code)
+- winc : Write increment (trigger to increment wptr)
+- rinc : Read increment (trigger to increment rptr)
+- waddr : Binary write pointer address (index into FIFO memory for writes)
+- raddr : Binary read pointer address (index into FIFO memory for reads)
+- wfull : FIFO full flag (asserted when FIFO cannot accept more writes)
+- rempty : FIFO empty flag (asserted when FIFO has no data to read)
+- wrst_n : Active-low asynchronous reset for the write pointer domain
+- rrst_n : Active-low asynchronous reset for the read pointer domain
+- w_rptr : Read pointer synchronized into the write-clock domain (via 2-FF synchronizer)
+- r_wptr : Write pointer synchronized into the read-clock domain (via 2-FF synchronizer)
 
-wptr : Write pointer (Gray)
+---
 
-rptr : Read pointer (Gray)
+## Design Modules
 
-winc : Write pointer increment. Controls the increment of the write pointer (wptr)
+The design is divided into five primary modules:
 
-rinc : Read pointer increment. Controls the increment of the read pointer (rptr)
+1. FIFO.v  
+   - Top-level wrapper. Instantiates the memory, pointer handlers, and synchronizers. In larger integrations this wrapper may be discarded and the internal modules instantiated directly.
 
-waddr : Binary write pointer address. Location (address) of the FIFO memory to which data (wdata) is to be written
+2. FIFO_memory.v  
+   - Dual-port RAM that provides simultaneous read and write ports with both clocks.
 
-raddr : Binary read pointer address. Location (address) of the FIFO memory from where data (rdata) is to be read
+3. two_ff_sync.v  
+   - Two-flop synchronizer module used to safely transfer pointer values between clock domains. There are two instances:
+     - Write-to-read pointer synchronization
+     - Read-to-write pointer synchronization
 
-wfull : FIFO full flag. Goes high if the FIFO memory is full
+4. rptr_empty.v  
+   - Read-pointer handler. Synchronized to the read clock and generates the FIFO empty signal (rempty) and next read address logic.
 
-rempty : FIFO empty flag. Goes high if the FIFO memory is empty
+5. wptr_empty.v  
+   - Write-pointer handler. Synchronized to the write clock and generates the FIFO full signal (wfull) and next write address logic.
 
-wrst_n : Active low asynchronous reset for the write pointer handler
+---
 
-rrst_n : Active low asynchronous reset for the read pointer handler
+## Testbench Implementation
 
-w_rptr : Read pointer signal synchronized to the wclk domain via 2 flip-flop synchronizer
+The testbench validates FIFO functionality by generating stimuli and checking responses. Main cases included:
 
-r_wptr : Write pointer signal synchronized to the rclk domain via 2 flip-flop synchronizer
+- Write random data and read it back, verifying data integrity.
+- Fill FIFO to the full condition and attempt additional writes (should be blocked).
+- Read from an empty FIFO and attempt additional reads (should be blocked or flagged).
 
-Dividing System Into Modules
+The testbench uses independent read and write clocks and applies reset sequences to initialize the FIFO. Simulation stops after the test cases complete.
 
-For implementing this FIFO, I have divided the design into 5 modules:
+---
 
-FIFO.v
-The top-level wrapper module includes all clock domains and is used to instantiate all other FIFO modules. In a larger ASIC or FPGA design, this wrapper would likely be discarded to group the FIFO modules by clock domain for better synthesis and static timing analysis.
+## Waveforms
 
-FIFO_memory.v
-This module contains the buffer or the memory of the FIFO, which has both the clocks. This is a dual-port RAM.
+Waveform screenshots demonstrating FIFO operation and verification are included below:
 
-two_ff_sync.v
-This module consists of two flip-flops that are connected to each other to form a 2 flip-flop synchronizer. This module has two instances:
+![Waveform 1](https://github.com/user-attachments/assets/0539f631-7e52-4d14-adfc-0bb51fefa1e2)
+![Waveform 2](https://github.com/user-attachments/assets/89e49ce7-aee6-4af7-bf75-ac7ebe3f203a)
+![Waveform 3](https://github.com/user-attachments/assets/a52c04f7-3074-4184-868e-3800d666ad24)
 
-Write to read clock pointer synchronization
+Additional images:
+![WhatsApp Image 1](https://github.com/user-attachments/assets/4535ca30-eb5a-4d2d-a6c4-59a330545808)
+![WhatsApp Image 2](https://github.com/user-attachments/assets/15c1dec8-5707-426d-9c66-4f28a1087278)
 
-Read to write clock pointer synchronization
+---
 
-rptr_empty.v
-This module consists of the logic for the read pointer handler. It is completely synchronized by the read clock and consists of the logic for generation of FIFO empty signal.
-
-wptr_empty.v
-This module consists of the logic for the write pointer handler. It is completely synchronized by the write clock and consists of the logic for generation of FIFO full signal.
-
-Testbench Case Implementation
-
-The testbench for the FIFO module generates random data and writes it to the FIFO, then reads it back and compares the results.
-
-The testbench includes three test cases:
-
-Write data and read it back
-
-Write data to make the FIFO full and try to write more data
-
-Read data from an empty FIFO and try to read more data
-
-The testbench uses clock signals for writing and reading, and includes reset signals to initialize the FIFO. The testbench finishes after running the test cases.
-
-Waveforms
-
-Waveform results validating FIFO operation are provided below
-
-<img width="1335" height="316" alt="Screenshot 2025-12-15 224943" src="https://github.com/user-attachments/assets/0539f631-7e52-4d14-adfc-0bb51fefa1e2" />
-<img width="1334" height="311" alt="Screenshot 2025-12-15 225017" src="https://github.com/user-attachments/assets/89e49ce7-aee6-4af7-bf75-ac7ebe3f203a" />
-<img width="1352" height="390" alt="Screenshot 2025-12-15 225110" src="https://github.com/user-attachments/assets/a52c04f7-3074-4184-868e-3800d666ad24" 
-  ![WhatsApp Image 2025-12-10 at 17 21 05](https://github.com/user-attachments/assets/4535ca30-eb5a-4d2d-a6c4-59a330545808)
-  ![WhatsApp Image 2025-12-10 at 17 21 04](https://github.com/user-attachments/assets/15c1dec8-5707-426d-9c66-4f28a1087278)
-
-
-
-
+If you want, I can:
+- Improve wording for specific sections,
+- Add usage instructions (how to run simulations with a particular simulator),
+- Create a short quick-start example showing compilation and simulation commands.
