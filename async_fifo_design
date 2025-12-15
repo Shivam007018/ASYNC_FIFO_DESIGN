@@ -1,5 +1,5 @@
 // 2-FF Synchronizer
-// ============================================================
+
 module two_ff_sync #(parameter SIZE = 4)( 
     output reg [SIZE-1:0] q2,
     input [SIZE-1:0] din,
@@ -15,9 +15,8 @@ module two_ff_sync #(parameter SIZE = 4)(
     end
 endmodule
 
-// ============================================================
-// Write Pointer Logic (Full Detection)
-// ============================================================
+// Write Pointer Logic
+
 module wptr_full #(parameter ADDR_SIZE = 4)(
     output reg wfull,
     output [ADDR_SIZE-1:0] waddr,
@@ -50,9 +49,9 @@ module wptr_full #(parameter ADDR_SIZE = 4)(
     end
 endmodule
 
-// ============================================================
+
 // Read Pointer Logic (Empty Detection)
-// ============================================================
+
 module rptr_empty #(parameter ADDR_SIZE = 4)(
     output reg rempty,
     output [ADDR_SIZE-1:0] raddr,
@@ -84,9 +83,9 @@ module rptr_empty #(parameter ADDR_SIZE = 4)(
     end
 endmodule
 
-// ============================================================
+
 // FIFO Memory
-// ============================================================
+
 module FIFO_memory #(parameter DATA_SIZE = 8, parameter ADDR_SIZE = 4)(
     output [DATA_SIZE-1:0] rdata,
     input [DATA_SIZE-1:0] wdata,
@@ -102,9 +101,9 @@ module FIFO_memory #(parameter DATA_SIZE = 8, parameter ADDR_SIZE = 4)(
             mem[waddr] <= wdata;
 endmodule
 
-// ============================================================
+
 // FIFO Core (DUT - Design Under Test)
-// ============================================================
+
 module FIFO #(parameter DSIZE = 8, parameter ASIZE = 4)(
     output [DSIZE-1:0] rdata,
     output wfull, rempty,
