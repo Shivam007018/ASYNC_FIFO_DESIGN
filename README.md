@@ -139,8 +139,9 @@ Waveform screenshots demonstrating FIFO operation and verification are included 
 ![Waveform 2](https://github.com/user-attachments/assets/89e49ce7-aee6-4af7-bf75-ac7ebe3f203a)
 ![Waveform 3](https://github.com/user-attachments/assets/a52c04f7-3074-4184-868e-3800d666ad24)
 
-Implementation 
-![WhatsApp Image 1](https://github.com/user-attachments/assets/4535ca30-eb5a-4d2d-a6c4-59a330545808)
+Elaborated design :
+<img width="1058" height="514" alt="image" src="https://github.com/user-attachments/assets/eb617d20-72a6-4e14-809c-c90e488c3692" />
+Implemented design :
 ![WhatsApp Image 2](https://github.com/user-attachments/assets/15c1dec8-5707-426d-9c66-4f28a1087278)
 
 ---
