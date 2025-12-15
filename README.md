@@ -8,10 +8,16 @@ FIFO stands for "First-In, First-Out." It is a type of data structure or buffer 
 
 Async FIFO, or Asynchronous FIFO, is a FIFO buffer where the read and write operations are controlled by independent clock domains. This means that the writing process and the reading process are driven by different clocks, which are not synchronized. Async FIFOs are used to safely transfer data between these asynchronous clock domains.
 
+<img width="638" height="222" alt="image" src="https://github.com/user-attachments/assets/ea434eff-1b29-4554-bc36-2276b18e9e56" />
+
+
 Design Space Exploration and Design Strategies
 
 The block diagram of async FIFO that is implemented in this repo is given below.
 Thin lines represent single-bit signals whereas thick lines represent multi-bit signals.
+
+<img width="1125" height="577" alt="image" src="https://github.com/user-attachments/assets/74d71bfa-54b8-4d00-99dd-3721617b8e8e" />
+
 
 Full, Empty and Wrapping Condition
 Empty Condition
@@ -116,3 +122,13 @@ The testbench uses clock signals for writing and reading, and includes reset sig
 Waveforms
 
 Waveform results validating FIFO operation are provided below
+
+<img width="1335" height="316" alt="Screenshot 2025-12-15 224943" src="https://github.com/user-attachments/assets/0539f631-7e52-4d14-adfc-0bb51fefa1e2" />
+<img width="1334" height="311" alt="Screenshot 2025-12-15 225017" src="https://github.com/user-attachments/assets/89e49ce7-aee6-4af7-bf75-ac7ebe3f203a" />
+<img width="1352" height="390" alt="Screenshot 2025-12-15 225110" src="https://github.com/user-attachments/assets/a52c04f7-3074-4184-868e-3800d666ad24" 
+  ![WhatsApp Image 2025-12-10 at 17 21 05](https://github.com/user-attachments/assets/4535ca30-eb5a-4d2d-a6c4-59a330545808)
+  ![WhatsApp Image 2025-12-10 at 17 21 04](https://github.com/user-attachments/assets/15c1dec8-5707-426d-9c66-4f28a1087278)
+
+
+
+
