@@ -141,7 +141,9 @@ Waveform screenshots demonstrating FIFO operation and verification are included 
 
 Elaborated design :
 <img width="1058" height="514" alt="image" src="https://github.com/user-attachments/assets/eb617d20-72a6-4e14-809c-c90e488c3692" />
+
 Implemented design :
+
 ![WhatsApp Image 2](https://github.com/user-attachments/assets/15c1dec8-5707-426d-9c66-4f28a1087278)
 
 ---
