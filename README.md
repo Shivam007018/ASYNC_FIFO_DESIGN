@@ -10,7 +10,7 @@ Async FIFO, or Asynchronous FIFO, is a FIFO buffer where the read and write oper
 
 <img width="652" height="222" alt="image" src="https://github.com/user-attachments/assets/f2cb9967-e6f1-4708-a9fd-220ab91cacd1" />
 
-Design Space Exploration and Design Strategies
+Design Space Exploration and Design Strategies 
 The block diagram of async. FIFO that is implemented in this repo is given below. Thin lines represent single bit signal where as thisck lines represent multi-bit signal.
 
 <img width="1128" height="575" alt="image" src="https://github.com/user-attachments/assets/bba3cdda-b81b-405d-a8f4-37c8cba664a2" />
