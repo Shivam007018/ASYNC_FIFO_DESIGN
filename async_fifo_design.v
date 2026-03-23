@@ -101,7 +101,6 @@ endmodule
 // DATA_SIZE: Size of the data bus
 // ADDR_SIZE: Size of the address bus
 
-
 module FIFO_memory #(parameter DATA_SIZE = 8,
     parameter ADDR_SIZE = 4)(
     output [DATA_SIZE-1:0] rdata,        // Output data - data to be read
