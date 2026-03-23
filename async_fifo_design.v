@@ -2,8 +2,8 @@
 // SIZE: Size of the input data bus
 
 module two_ff_sync #(parameter SIZE = 4)( 
-    output reg [SIZE-1:0] q2,   // Output of the second flip-flop
-    input [SIZE-1:0] din,       // Input data
+    output reg [SIZE:0] q2,   // Output of the second flip-flop
+    input [SIZE:0] din,       // Input data
     input clk, rst_n            // Clock and reset
     );
 
